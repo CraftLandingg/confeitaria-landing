@@ -134,7 +134,7 @@ export default function App() {
  const handleSubmit = (e) => {
     e.preventDefault();
     
-    const phoneTarget = "351912884900"; // Substitui pelo teu telemóvel
+    const phoneTarget = "351925566577"; // Substitui pelo teu telemóvel
 
     const textMessage = 
       `*Nova Encomenda - Atelier Douceur*\n\n` +
