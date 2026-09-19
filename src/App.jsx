@@ -16,7 +16,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('all');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
-  
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -130,10 +131,10 @@ export default function App() {
     setOpenFaq(openFaq === idx ? null : idx);
   };
 
-  const handleSubmit = (e) => {
+ const handleSubmit = (e) => {
     e.preventDefault();
     
-    const phoneTarget = "351025566577"; // Número de destino com indicativo (+351)
+    const phoneTarget = "351912884900"; // Substitui pelo teu telemóvel
 
     const textMessage = 
       `*Nova Encomenda - Atelier Douceur*\n\n` +
@@ -145,7 +146,21 @@ export default function App() {
       `• *Observações/Alergias:* ${formData.notes || "Nenhuma observação"}`;
 
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneTarget}&text=${encodeURIComponent(textMessage)}`;
+    
+    setIsSubmitted(true);
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleResetForm = () => {
+    setIsSubmitted(false);
+    setFormData({
+      name: '',
+      phone: '',
+      product: '',
+      guests: '10 a 15 pessoas',
+      date: '',
+      notes: ''
+    });
   };
 
   return (
@@ -477,111 +492,174 @@ export default function App() {
         </div>
       </section>
 
-      {/* FORMULÁRIO DE ENCOMENDA DIRETA PARA WHATSAPP */}
+     {/* FORMULÁRIO DE ENCOMENDA COM ECRÃ DE CONFIRMAÇÃO */}
       <section id="encomenda" className="py-20 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-[#E8E1D5] shadow-2xl p-8 sm:p-12 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-[#E8E1D5] shadow-2xl p-8 sm:p-12 relative overflow-hidden transition-all">
           
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full inline-block mb-3">
-              Atendimento Personalizado
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#1E1B18]">Faça o seu pedido de encomenda</h2>
-            <p className="text-sm text-[#6B635B] mt-2">
-              Preencha os detalhes abaixo para enviarmos a confirmação com o orçamento e opções diretamente no WhatsApp.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid sm:grid-cols-2 gap-6">
-              
-              <div>
-                <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">O Seu Nome</label>
-                <input 
-                  type="text" 
-                  required
-                  placeholder="Ex: Carolina Mendes" 
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
-                />
+          {isSubmitted ? (
+            /* ECRÃ DE SUCESSO / ENVIADO */
+            <div className="text-center py-8 space-y-6 animate-fadeIn">
+              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-4xl shadow-inner animate-bounce">
+                ✓
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Contacto Telemóvel</label>
-                <input 
-                  type="tel" 
-                  required
-                  placeholder="Ex: +351 912 345 678" 
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
-                />
+              <div className="space-y-2">
+                <span className="bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full inline-block">
+                  Pedido Encaminhado
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#1E1B18]">
+                  Obrigado, {formData.name || 'estimado(a) cliente'}!
+                </h2>
+                <p className="text-sm text-[#6B635B] max-w-lg mx-auto leading-relaxed">
+                  A janela do WhatsApp foi iniciada com os dados da tua criação. Se não abriu automaticamente, utiliza o botão abaixo para confirmar os detalhes com a nossa equipa.
+                </p>
               </div>
 
-            </div>
-
-            <div className="grid sm:grid-cols-3 gap-6">
-              
-              <div>
-                <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Criação Pretendida</label>
-                <input 
-                  type="text" 
-                  placeholder="Ex: Tarte Pistácio ou Bolo Nuvem"
-                  value={formData.product}
-                  onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
-                />
+              {/* Cartão de Resumo da Encomenda */}
+              <div className="bg-[#FAF7F2] border border-[#E8E1D5] rounded-2xl p-6 text-left max-w-md mx-auto text-xs space-y-2.5">
+                <div className="flex justify-between pb-2 border-b border-[#E8E1D5]">
+                  <span className="text-stone-500 font-semibold">Criação:</span>
+                  <span className="font-bold text-[#1E1B18]">{formData.product || "A combinar no WhatsApp"}</span>
+                </div>
+                <div className="flex justify-between pb-2 border-b border-[#E8E1D5]">
+                  <span className="text-stone-500 font-semibold">Estimativa:</span>
+                  <span className="font-bold text-[#1E1B18]">{formData.guests}</span>
+                </div>
+                {formData.date && (
+                  <div className="flex justify-between pb-2 border-b border-[#E8E1D5]">
+                    <span className="text-stone-500 font-semibold">Data Prevista:</span>
+                    <span className="font-bold text-[#1E1B18]">{formData.date}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-stone-500 font-semibold">Contacto:</span>
+                  <span className="font-bold text-[#1E1B18]">{formData.phone}</span>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Estimativa de Pessoas</label>
-                <select 
-                  value={formData.guests}
-                  onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-8 py-3.5 rounded-xl shadow-lg shadow-emerald-200 transition"
                 >
-                  <option value="6 a 8 pessoas">6 a 8 pessoas</option>
-                  <option value="10 a 15 pessoas">10 a 15 pessoas</option>
-                  <option value="20 a 30 pessoas">20 a 30 pessoas</option>
-                  <option value="Mais de 30 convidados (Evento)">Mais de 30 convidados (Evento)</option>
-                </select>
+                  <Icons.Message /> Reabrir WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetForm}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 text-[#5A524A] font-bold text-sm px-6 py-3.5 rounded-xl transition"
+                >
+                  Fazer Novo Pedido
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* FORMULÁRIO ATIVO */
+            <>
+              <div className="text-center max-w-xl mx-auto mb-10">
+                <span className="bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full inline-block mb-3">
+                  Atendimento Personalizado
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#1E1B18]">Faça o seu pedido de encomenda</h2>
+                <p className="text-sm text-[#6B635B] mt-2">
+                  Preencha os detalhes abaixo para enviarmos a confirmação com o orçamento e opções diretamente no WhatsApp.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Data Desejada</label>
-                <input 
-                  type="date" 
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
-                />
-              </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid sm:grid-cols-2 gap-6">
+                  
+                  <div>
+                    <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">O Seu Nome</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="Ex: Carolina Mendes" 
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
+                    />
+                  </div>
 
-            </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Contacto Telemóvel</label>
+                    <input 
+                      type="tel" 
+                      required
+                      placeholder="Ex: +351 912 345 678" 
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
+                    />
+                  </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Observações ou Alergias</label>
-              <textarea 
-                rows="3"
-                placeholder="Ex: Mensagem na placa de chocolate, restrições alimentares..."
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
-              />
-            </div>
+                </div>
 
-            <button 
-              type="submit"
-              className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold text-base rounded-2xl shadow-xl shadow-rose-200 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-3"
-            >
-              <Icons.Message />
-              Enviar Pedido e Abrir Conversa no WhatsApp
-            </button>
+                <div className="grid sm:grid-cols-3 gap-6">
+                  
+                  <div>
+                    <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Criação Pretendida</label>
+                    <input 
+                      type="text" 
+                      placeholder="Ex: Tarte Pistácio ou Bolo Nuvem"
+                      value={formData.product}
+                      onChange={(e) => setFormData({ ...formData, product: e.target.value })}
+                      className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
+                    />
+                  </div>
 
-            <p className="text-center text-xs text-[#827970]">
-              Sem pagamentos online. Validamos consigo a disponibilidade da data no WhatsApp em menos de 2 horas.
-            </p>
-          </form>
+                  <div>
+                    <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Estimativa de Pessoas</label>
+                    <select 
+                      value={formData.guests}
+                      onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
+                      className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
+                    >
+                      <option value="6 a 8 pessoas">6 a 8 pessoas</option>
+                      <option value="10 a 15 pessoas">10 a 15 pessoas</option>
+                      <option value="20 a 30 pessoas">20 a 30 pessoas</option>
+                      <option value="Mais de 30 convidados (Evento)">Mais de 30 convidados (Evento)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Data Desejada</label>
+                    <input 
+                      type="date" 
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      className="w-full px-4 py-3.5 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
+                    />
+                  </div>
+
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#2D2A26] uppercase tracking-wider mb-2">Observações ou Alergias</label>
+                  <textarea 
+                    rows="3"
+                    placeholder="Ex: Mensagem na placa de chocolate, restrições alimentares..."
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-[#D5CCC0] focus:outline-none focus:ring-2 focus:ring-rose-500 bg-[#FAF7F2] text-sm"
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold text-base rounded-2xl shadow-xl shadow-rose-200 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-3"
+                >
+                  <Icons.Message />
+                  Enviar Pedido e Abrir Conversa no WhatsApp
+                </button>
+
+                <p className="text-center text-xs text-[#827970]">
+                  Sem pagamentos online. Validamos consigo a disponibilidade da data no WhatsApp em menos de 2 horas.
+                </p>
+              </form>
+            </>
+          )}
 
         </div>
       </section>
